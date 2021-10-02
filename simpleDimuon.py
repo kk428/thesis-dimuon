@@ -54,13 +54,9 @@ labelVtxDisp = ("hltScoutingMuonPackerCalo","displacedVtx")
 ROOT.gROOT.SetBatch()        
 ROOT.gROOT.SetStyle('Plain') 
 
-i = 0
-while os.path.exists("hist%s.root" % i):
-    i += 1
-
-hM_mumuOS = ROOT.TH1F ("mumuOS%s"%i, "mumuOS%s"%i, 100, 0., 100)
-hM_mumuSS = ROOT.TH1F ("mumuSS%s"%i, "mumuSS%s"%i, 100, 0., 1.)
-hM_munum = ROOT.TH1F ("munum%s"%i, "munum%s"%i, 20, 0., 20.)
+hM_mumuOS = ROOT.TH1F ("mumuOS", "mumuOS", 100, 0., 100)
+hM_mumuSS = ROOT.TH1F ("mumuSS", "mumuSS", 100, 0., 1.)
+hM_munum = ROOT.TH1F ("munum", "munum", 20, 0., 20.)
 
 # double_mu_counts = 0
 
@@ -80,27 +76,28 @@ for kl, event in enumerate(events) :
 
     hM_munum.Fill(numMuons+0.1)
 
-    if numMuons < 4: continue
+    if numMuons < 2: continue#4: continue
 
     muon1 = ROOT.TLorentzVector ()
     muon2 = ROOT.TLorentzVector ()
-    muon3 = ROOT.TLorentzVector ()
-    muon4 = ROOT.TLorentzVector ()
+    #muon3 = ROOT.TLorentzVector ()
+    #muon4 = ROOT.TLorentzVector ()
 
     muon1.SetPtEtaPhiM(muons[0].pt(), muons[0].eta(), muons[0].phi(), 0.10566)
     muon2.SetPtEtaPhiM(muons[1].pt(), muons[1].eta(), muons[1].phi(), 0.10566)
-    muon3.SetPtEtaPhiM(muons[2].pt(), muons[2].eta(), muons[2].phi(), 0.10566)
-    muon4.SetPtEtaPhiM(muons[3].pt(), muons[3].eta(), muons[3].phi(), 0.10566)
+    #muon3.SetPtEtaPhiM(muons[2].pt(), muons[2].eta(), muons[2].phi(), 0.10566)
+    #muon4.SetPtEtaPhiM(muons[3].pt(), muons[3].eta(), muons[3].phi(), 0.10566)
 
-    invMass = (muon1+muon2+muon3+muon4).M()
+    invMass = (muon1+muon2).M()#+muon3+muon4).M()
 
     #if (invMass <= 0.212) :
      #   printEvent()
 
-    if (muons[0].charge()*muons[1].charge()*muons[2].charge()*muons[3].charge()) > 0 and int(muons[0].charge()+muons[1].charge()+muons[2].charge()+muons[3].charge())==0: 
+    #if (muons[0].charge()*muons[1].charge()*muons[2].charge()*muons[3].charge()) > 0 and int(muons[0].charge()+muons[1].charge()+muons[2].charge()+muons[3].charge())==0:
+    if (muons[0].charge()*muons[1].charge()<0):
         hM_mumuOS.Fill(invMass)
-        print("\n\nM_mumu={0:.5f}".format(invMass))
-        printEvent(muons, vertices)
+        #print("\n\nM_mumu={0:.5f}".format(invMass))
+        #printEvent(muons, vertices)
     else :
         hM_mumuSS.Fill(invMass)
 
@@ -111,8 +108,11 @@ for kl, event in enumerate(events) :
         
     if args.nEvents > 0 and kl > args.nEvents : break
 
+i = 0
+while os.path.exists("hist%s.root" % i):
+    i += 1
 
-outputFile=ROOT.TFile("hist%s.root" % i,"recreate")
+outputFile=ROOT.TFile("hist%s.root"%i,"recreate")
 
 
 hM_mumuOS.Write()
